@@ -1,19 +1,53 @@
-document.addEventListener("click", function(event) {
-    let color = getComputedStyle(event.target).backgroundColor;
+console.log("Color picker script loaded!");
 
-    // Convert RGB to HEX
-    function rgbToHex(rgb) {
-        let result = rgb.match(/\d+/g).map(Number);
-        return "#" + result.map(x => x.toString(16).padStart(2, '0')).join('');
-    }
+// Global variables to track event listener state
+if (!window.colorPickerActive) {
+    window.colorPickerActive = true;
 
-    let hexColor = rgbToHex(color);
+    window.pickColor = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
 
-    // Copy color to clipboard
-    navigator.clipboard.writeText(hexColor).then(() => {
-        alert("Color copied: " + hexColor);
-    });
+        let element = event.target;
+        let color = getComputedStyle(element).backgroundColor;
 
-    // Send color back to popup
-    chrome.storage.local.set({ selectedColor: hexColor });
-});
+        // Function to find the closest non-transparent color
+        function getNonTransparentColor(el) {
+            while (el && el !== document.documentElement) {
+                let bgColor = getComputedStyle(el).backgroundColor;
+                if (bgColor.startsWith("rgb") && bgColor !== "rgba(0, 0, 0, 0)") {
+                    return bgColor;
+                }
+                el = el.parentElement;
+            }
+            return "rgb(255, 255, 255)";
+        }
+
+        color = getNonTransparentColor(element);
+
+        // Convert RGB to HEX safely
+        function rgbToHex(rgb) {
+            let match = rgb.match(/\d+/g);
+            if (!match || match.length < 3) {
+                console.error("Invalid color format:", rgb);
+                return "#FFFFFF";
+            }
+            let [r, g, b] = match.map(Number);
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+
+        let hexColor = rgbToHex(color);
+        navigator.clipboard.writeText(hexColor).then(() => {
+            alert("Color copied: " + hexColor);
+        });
+
+        chrome.storage.local.set({ selectedColor: hexColor });
+
+        console.log("Picked Color:", hexColor);
+    };
+
+    document.addEventListener("click", window.pickColor);
+    console.log("Color picker activated!");
+} else {
+    console.log("Color picker already active.");
+}

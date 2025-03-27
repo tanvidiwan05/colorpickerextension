@@ -3,22 +3,28 @@ body {
     padding: 10px;
     font-family: Arial, sans-serif;
     text-align: center;
+    background-color: #473c33;
+    border: #fda769;
 }
 
 button {
-    background-color: #007bff;
+    background-color: #fec868;
     color: white;
     border: none;
     padding: 8px;
     cursor: pointer;
     width: 100%;
     margin-bottom: 10px;
+    border-radius: 5px;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #fda769;
 }
 
 p {
     font-size: 14px;
+}
+h2{
+    color: #abc270;
 }
